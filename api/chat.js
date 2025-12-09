@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 export default async function handler(req, res) {
-  // ---- CORS FIX ----
+  // CORS FIX
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -23,26 +23,27 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid messages format." });
     }
 
+    // OPENAI CLIENT
     const client = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
 
     const completion = await client.chat.completions.create({
-      model: "gpt-4o", // Your model is correct
+      model: "gpt-4o",
       messages,
-      temperature: 0.4,
+      temperature: 0.5
     });
 
-    // ---- CORRECT GPT RESPONSE SHAPE ----
-    res.status(200).json({
-      choices: completion.choices,
+    // RETURN GPT SHAPE
+    return res.status(200).json({
+      choices: completion.choices
     });
 
   } catch (error) {
-    console.error("Backend error:", error);
-    res.status(500).json({
-      error: "Server error",
-      detail: error.message,
+    console.error("SERVER ERROR:", error);
+    return res.status(500).json({
+      error: "OpenAI request failed",
+      detail: error.message
     });
   }
 }
