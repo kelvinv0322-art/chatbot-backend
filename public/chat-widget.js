@@ -1,4 +1,6 @@
 (function () {
+  const API_URL = "https://chatbot-backend-lemon-zeta.vercel.app/api/chat";
+
   const bubble = document.createElement("div");
   bubble.innerText = "Chat";
   bubble.style.cssText = `
@@ -59,7 +61,7 @@
       userMsg.innerText = "You: " + text;
       messagesDiv.appendChild(userMsg);
 
-      const res = await fetch("/api/chat", {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [{ role: "user", content: text }] }),

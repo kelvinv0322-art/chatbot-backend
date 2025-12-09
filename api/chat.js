@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 export default async function handler(req, res) {
-  // --- CORS FIX ---
+  // ---- CORS FIX ----
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -9,17 +9,18 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  // -----------------
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed. Use POST." });
+    return res.status(405).json({
+      error: "Method not allowed. Use POST.",
+    });
   }
 
   try {
     const { messages } = req.body;
 
-    if (!messages) {
-      return res.status(400).json({ error: "No messages provided." });
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: "Invalid messages format." });
     }
 
     const client = new OpenAI({
@@ -27,16 +28,21 @@ export default async function handler(req, res) {
     });
 
     const completion = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // Your model is correct
       messages,
       temperature: 0.4,
     });
 
-    return res.status(200).json({
-      reply: completion.choices[0].message,
+    // ---- CORRECT GPT RESPONSE SHAPE ----
+    res.status(200).json({
+      choices: completion.choices,
     });
+
   } catch (error) {
-    console.error("Chat API Error:", error);
-    return res.status(500).json({ error: error.message });
+    console.error("Backend error:", error);
+    res.status(500).json({
+      error: "Server error",
+      detail: error.message,
+    });
   }
 }
